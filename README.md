@@ -4,11 +4,11 @@ Simple Project to improve skills
 Its a shop where you can add products to the inventory. Each product will have a price, quantity of the product.. You can buy products and supply the shop when some product is running low. 
 
 commands: 
-add (product name) (price) (quantity)
-buy (quantity) (product name) 
-supply (quantity) (product name) 
-fstock - prints all the information about the products in the inventory
-quit 
+- add (product name) (price) (quantity)
+- buy (quantity) (product name) 
+- supply (quantity) (product name) 
+- fstock - prints all the information about the products in the inventory
+- quit 
 
 example of interaction:
 
