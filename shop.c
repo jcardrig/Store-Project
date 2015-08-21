@@ -11,143 +11,147 @@ typedef struct prod{
 
 typedef product *link_product;
 
-typedef struct store{
+typedef struct st{
 	link_product object;
-	struct store *menor;
-	struct store *maior;
+	struct st *lower;
+	struct st *higher;
 	int height;
-}*Store;
+} store;
 
-Store create_product(int code, char *nome, int price, int n_stock);
-Store add_product(Store h,Store p);
-int height(Store p);
-Store rotL(Store h);
-Store rotR(Store h);
-Store rotRL(Store h);
-Store rotLR(Store h);
-int balance(Store h);
-Store balance_arv(Store h);
+/* Function Index */
+int avl_height(store* p);
+int avl_balanceFactor(store* h);
+int encrypt(char *name);
+void info_stock(store* h);
+store* create_product(int code, char *nome, int price, int n_stock);
+store* add_product(store* h,store* p);
+store* avl_rotate_left(store* h);
+store* avl_rotate_right(store* h);
+store* avl_rotate_right_left(store* h);
+store* avl_rotate_left_right(store* h);
+store* avl_balance(store* h);
+store* find_product(store* h, int code);
+/* ------------- */
 
-Store create_product(int code, char *name, int price, int n_stock){
-	Store h = (Store) malloc(sizeof(struct store));
+
+store* create_product(int code, char *name, int price, int n_stock){
+	store* h = (store*) malloc(sizeof(store));
 	link_product x = (link_product) malloc(sizeof(product));
 	x->code = code;
 	x->name = strdup(name);
 	x->price = price;
 	x->n_stock = n_stock;
 	h->object = x;
-	h->menor = NULL;
-	h->maior = NULL;
+	h->lower = NULL;
+	h->higher = NULL;
 	h->height = 1;
 	return h;
 }
 
-Store add_product(Store h,Store p){
+store* add_product(store* h,store* p){
 	if (h==NULL) return p;
 	else if (p->object->code < h->object->code)
-		h->menor = add_product(h->menor, p);
+		h->lower = add_product(h->lower, p);
 	else
-		h->maior = add_product(h->maior, p);
+		h->higher = add_product(h->higher, p);
 
-	h = balance_arv(h);
+	h = avl_balance(h);
 	return h;
 }
 
 /* AVL FUNCTIONS */
 
-int height(Store h){
+int avl_height(store* h){
 	if(h==NULL) return 0;
 	return h->height;
 }
 
-Store rotL(Store h){
+store* avl_rotate_left(store* h){
 	int height_left, height_right;
-	Store x = h->maior;
-	h->maior = x->menor;
-	x->menor = h;
-	height_left = height(h->menor);
-	height_right = height(h->maior);
+	store* x = h->higher;
+	h->higher = x->lower;
+	x->lower = h;
+	height_left = avl_height(h->lower);
+	height_right = avl_height(h->higher);
 	h->height = height_left > height_right ? height_left + 1 : height_right + 1;
-	height_left = height(x->menor);
-	height_right = height(x->maior);
+	height_left = avl_height(x->lower);
+	height_right = avl_height(x->higher);
 	x->height = height_left > height_right ? height_left + 1 : height_right + 1;
 	return x;
 }
 
-Store rotR(Store h){
+store* avl_rotate_right(store* h){
 	
 	int height_left, height_right;
-	Store x = h->menor;
-	h->menor = x->maior;
-	x->maior = h;
-	height_left = height(h->menor);
-	height_right = height(h->maior);
+	store* x = h->lower;
+	h->lower = x->higher;
+	x->higher = h;
+	height_left = avl_height(h->lower);
+	height_right = avl_height(h->higher);
 	h->height = height_left > height_right ? height_left + 1: height_right + 1;
-	height_left = height(x->menor);
-	height_right = height(x->maior);
+	height_left = avl_height(x->lower);
+	height_right = avl_height(x->higher);
 	x->height = height_left > height_right ? height_left + 1: height_right + 1;
 	return x;
 }
 
-Store rotLR(Store h){
+store* avl_rotate_left_right(store* h){
 	if(h==NULL) return h;
-	h->menor = rotL(h->menor);
-	return rotR(h);
+	h->lower = avl_rotate_left(h->lower);
+	return avl_rotate_right(h);
 }
 
-Store rotRL(Store h){
+store* avl_rotate_right_left(store* h){
 	if(h==NULL) return h;
-	h->maior = rotR(h->maior);
-	return rotL(h);
+	h->higher = avl_rotate_right(h->higher);
+	return avl_rotate_left(h);
 }
 
-int balance(Store h){
+int avl_balanceFactor(store* h){
 	if(h==NULL) return 0;
-	return height(h->menor) - height(h->maior);
+	return avl_height(h->lower) - avl_height(h->higher);
 }
 
-Store balance_arv(Store h){
+store* avl_balance(store* h){
 	int balanceFactor;
 	if (h == NULL) return h;
-	balanceFactor = balance(h);
+	balanceFactor = avl_balanceFactor(h);
 	if(balanceFactor>1){
-		if(balance(h->menor)>0) h = rotR(h);
-		else h = rotLR(h);
+		if(avl_balanceFactor(h->lower)>0) h = avl_rotate_right(h);
+		else h = avl_rotate_left_right(h);
 	}
 	else if(balanceFactor<-1){
-		if(balance(h->maior)<0) h = rotL(h);
-		else h = rotRL(h);
+		if(avl_balanceFactor(h->higher)<0) h = avl_rotate_left(h);
+		else h = avl_rotate_right_left(h);
 	}
 	else{
-		int height_left = height(h->menor);
-		int height_right = height(h->maior);
+		int height_left = avl_height(h->lower);
+		int height_right = avl_height(h->higher);
 		h->height = height_left > height_right ? height_left + 1 : height_right + 1;
 	}
 	return h;
 }
 
-void info_stock(Store h){
+void info_stock(store* h){
 	if (h == NULL) return;
-	info_stock(h->menor);
+	info_stock(h->lower);
 	printf("Product: %s  Price: %d  Total: %d\n", h->object->name, h->object->price, h->object->n_stock);
-	info_stock(h->maior);
+	info_stock(h->higher);
 }
 
 
-Store find_product(Store h, int code){
+store* find_product(store* h, int code){
 	if(h==NULL) return NULL;
 
 	else if (code==h->object->code)
 		return h;
 
 	else if (code < h->object->code)
-		return find_product(h->menor,code);
+		return find_product(h->lower,code);
 
 	else
-		return find_product(h->maior,code);
+		return find_product(h->higher,code);
 }
-
-
 
 /* END AVL FUCNTIONS */
 
@@ -161,8 +165,8 @@ int encrypt(char *name){
 }
 
 int main(){
-	Store head = NULL;
-	Store temp = NULL;
+	store* head = NULL;
+	store* temp = NULL;
 	int price, n_stock, code, quant;
 	char name[35];
 	char command[100];
